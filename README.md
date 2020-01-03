@@ -21,11 +21,14 @@ Add a helm chart to the helm folder. I have added a stable folder too to indecat
 
 ## Start
 
+Navigate to the root of this repo after you have cloned it and run `tilt up`
+
 # Troubleshooting 
 
 # Reference Documentation:
 
 * [Helm Quickstart](https://helm.sh/docs/intro/quickstart/)
+* [tilt](https://docs.tilt.dev/)
 
 # Dependency
 
