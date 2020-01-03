@@ -1,0 +1,10 @@
+# this is using the ambassador crd, you can also use annotations if you like ... but this is cleaner
+---
+apiVersion: getambassador.io/v1
+kind: Mapping
+metadata:
+  name: basicingress
+  namespace: tilt-integration
+spec:
+  prefix: /basicingress/
+  service: basicingress:5000

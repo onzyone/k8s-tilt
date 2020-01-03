@@ -1,0 +1,24 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: basicingress
+  namespace: tilt-integration
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: basicingress
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: basicingress
+    spec:
+      containers:
+      - name: basicingress
+        image: basicingress
+        ports:
+        - name: http
+          containerPort: 5000
