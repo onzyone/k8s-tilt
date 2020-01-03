@@ -6,5 +6,5 @@ metadata:
   name: basicingress
   namespace: tilt-integration
 spec:
-  prefix: /
+  prefix: /basicingress/
   service: basicingress:5000

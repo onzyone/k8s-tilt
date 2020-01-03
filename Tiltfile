@@ -1,6 +1,8 @@
 # TOOD: Add this to an include so that it will be common for each app
 
-# TODO only intall metallb if running in a local env like kind (metallb is used for a local LB)
+# note that helm tempates are converted into yaml and a kubectl apply is run on the yaml object, ie `helm ls` will not show anything
+
+# TODO only install metallb only if running in a local env like kind (metallb is used for a local LB)
 print('Installing metallb')
 yaml = helm(
   'charts/stable/metallb',

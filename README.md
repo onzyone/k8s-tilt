@@ -21,6 +21,8 @@ Add a helm chart to the helm folder. I have added a stable folder too to indecat
 
 ## Start
 
+*note* that helm tempates are converted into yaml and a kubectl apply is run on the yaml object, ie `helm ls` will not show anything
+
 Navigate to the root of this repo after you have cloned it and run `tilt up`
 
 # Troubleshooting 
