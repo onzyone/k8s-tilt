@@ -17,7 +17,10 @@ The goal for this is to setup a local env with a few tools like an ingress contr
 
 # Usage
 
-Add a helm chart to the helm folder. I have added a stable folder too to indecate the state of the chart, this allows you to the have an incubator or test folder too.
+1. Add a helm chart to the helm folder. I have added a stable folder too to indecate the state of the chart, this allows you to the have an incubator or test folder too.
+1. Add an app, in this example `basic-ingress`(basic go app), `oneup` ([from tilt examples](https://github.com/windmilleng/tilt/tree/master/integration/oneup)), and `ambassador-tour` ([from ambassador examples](https://www.getambassador.io/user-guide/getting-started/))
+1. vault demo is based off this page: [injecting-vault-secrets-into-kubernetes-pods-via-a-sidecar](https://www.hashicorp.com/blog/injecting-vault-secrets-into-kubernetes-pods-via-a-sidecar/)
+
 
 ## Start
 
