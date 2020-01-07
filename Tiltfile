@@ -4,7 +4,7 @@
 
 # TODO only install metallb only if running in a local env like kind (metallb is used for a local LB)
 print('Installing metallb')
-yaml = helm(
+yaml_metallb = helm(
   'charts/stable/metallb',
   # The release name, equivalent to helm --name
   name='tilt-metallb',
@@ -15,11 +15,11 @@ yaml = helm(
   # Values to set from the command-line
   # set=['service.port=1234', 'ingress.enabled=true']
   )
-k8s_yaml(yaml)
+k8s_yaml(yaml_metallb)
 k8s_yaml('helm-values/metallb/km-config.yaml')
 
 print('Installing Ambassador')
-yaml = helm(
+yaml_ambassador = helm(
   'charts/stable/ambassador',
   # The release name, equivalent to helm --name
   name='tilt-ambassador',
@@ -30,7 +30,25 @@ yaml = helm(
   # Values to set from the command-line
   # set=['service.port=1234', 'ingress.enabled=true']
   )
-k8s_yaml(yaml)
+k8s_yaml(yaml_ambassador)
+
+print('Installing vault')
+yaml_vault = helm(
+  'charts/stable/vault-helm',
+  # The release name, equivalent to helm --name
+  name='tilt-vault-helm',
+  # The namespace to install in, equivalent to helm --namespace
+  namespace='vault',
+  # The values file to substitute into the chart.
+  values=['./helm-values/vault-helm/values-local.yaml'],
+  )
+k8s_yaml(yaml_vault)
+
+print('Init Vault')
+local_resource('vault-init', cmd='vault-demo/sbin/vault-local.sh', resource_deps=['tilt-vault-helm'])
+
+print('Installing vault demo app')
+k8s_yaml('vault-demo/k8s/app.yaml')
 
 # oneup app with no ingress, just port mapping
 print('Deplying the oneup app')
