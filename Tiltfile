@@ -50,6 +50,18 @@ local_resource('vault-init', cmd='vault-demo/sbin/vault-local.sh', resource_deps
 print('Installing vault demo app')
 k8s_yaml('vault-demo/k8s/app.yaml')
 
+print('Installing consul')
+yaml_consul = helm(
+  'charts/stable/consul-helm',
+  # The release name, equivalent to helm --name
+  name='tilt-consul-helm',
+  # The namespace to install in, equivalent to helm --namespace
+  namespace='consul',
+  # The values file to substitute into the chart.
+  values=['./helm-values/consul-helm/values-local.yaml'],
+  )
+k8s_yaml(yaml_consul)
+
 # oneup app with no ingress, just port mapping
 print('Deplying the oneup app')
 # HACK: load namespaces on `tilt up` but not on `tilt down`
