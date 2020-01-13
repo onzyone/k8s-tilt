@@ -9,7 +9,7 @@ yaml_metallb = helm(
   # The release name, equivalent to helm --name
   name='tilt-metallb',
   # The namespace to install in, equivalent to helm --namespace
-  namespace='default',
+  namespace='ambassador',
   # The values file to substitute into the chart.
   values=['./helm-values/metallb/values-local.yaml'],
   # Values to set from the command-line
@@ -24,7 +24,7 @@ yaml_ambassador = helm(
   # The release name, equivalent to helm --name
   name='tilt-ambassador',
   # The namespace to install in, equivalent to helm --namespace
-  namespace='default',
+  namespace='ambassador',
   # The values file to substitute into the chart.
   values=['./helm-values/ambassador/values-local.yaml'],
   # Values to set from the command-line
@@ -48,6 +48,8 @@ print('Init Vault')
 local_resource('vault-init', cmd='vault-demo/sbin/vault-local.sh', resource_deps=['tilt-vault-helm'])
 
 print('Installing vault demo app')
+# the names from k8s deployment are used here
+k8s_resource('vault-app', resource_deps=['vault-init'])
 k8s_yaml('vault-demo/k8s/app.yaml')
 
 print('Installing consul')
@@ -61,6 +63,10 @@ yaml_consul = helm(
   values=['./helm-values/consul-helm/values-local.yaml'],
   )
 k8s_yaml(yaml_consul)
+
+print('Installing consul demo app')
+k8s_yaml('consul-demo/k8s/counting.yaml')
+k8s_yaml('consul-demo/k8s/dashboard.yaml')
 
 # oneup app with no ingress, just port mapping
 print('Deplying the oneup app')

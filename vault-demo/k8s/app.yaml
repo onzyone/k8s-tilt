@@ -22,7 +22,7 @@ spec:
     spec:
       serviceAccountName: app
       containers:
-      - name: app
+      - name: vault-app
         image: jweissig/app:0.0.1
 ---
 apiVersion: v1
