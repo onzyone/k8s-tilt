@@ -1,0 +1,49 @@
+---
+apiVersion: v1
+# TODO: make it a deployment
+kind: Pod
+metadata:
+  name: consuldashboard
+  namesapce: consul
+  labels:
+    app: consuldashboard
+  annotations:
+    "consul.hashicorp.com/connect-inject": "true"
+    "consul.hashicorp.com/connect-service-upstreams": "counting:9001"
+spec:
+  containers:
+  - name: consuldashboard
+    image: hashicorp/dashboard-service:0.0.4
+    ports:
+    - containerPort: 9002
+      name: http
+    env:
+    - name: COUNTING_SERVICE_URL
+      value: "http://localhost:9001"
+    - name: PORT
+      value: 9002
+---
+apiVersion: "v1"
+kind: Service
+metadata:
+  name: consuldashboard-service-load-balancer
+  namesapce: consul
+  labels:
+    app: consuldashboard
+  annotations:
+    getambassador.io/config: |
+      ---
+      apiVersion: ambassador/v1
+      kind: Mapping
+      name: consuldashboard_mapping
+      prefix: /consuldashboard
+      service: consuldashboard:9002
+spec:
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 9002
+  selector:
+    app: consuldashboard
+  # type: "LoadBalancer"
+  # loadBalancerIP: ""

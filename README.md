@@ -2,16 +2,17 @@
 
 The goal for this is to setup a local env with a few tools like an ingress controller deployed with helm and hello world app
 
-# Table of contents
+# Table of Contents
 =================
 <!--ts-->
    * [Overview](#Overview)
-   * [Table of contents](#table-of-contents)
-   * [Usage](#usage)
+   * [Table of contents](#Table-of-Contents)
+   * [Usage](#Usage)
       * [Start](#Start)
+      * [Load Balancer](#Load-Balancer)
    * [Troubleshooting](#Troubleshooting)
    * [Reference Documentation](#Reference-Documentation)
-   * [Dependency](#dependency)
+   * [Dependency](#Dependency)
 <!--te-->
 =================
 
@@ -41,14 +42,27 @@ The goal for this is to setup a local env with a few tools like an ingress contr
 # Troubleshooting 
 
 1. If you are having issues with local ingress on Mac OS, please look at this: [k8s-kind Troubleshooting](https://github.com/onzyone/k8s-kind#Troubleshooting)
+1. If local docker builds are working, but tilt builds are failing. Try to build the image with the following:
+   ```bash
+   $ tilt docker build .
+   Running Docker command as:
+   DOCKER_BUILDKIT=1 docker build . 
+   ---
+   ...
+   ```
+   * If it still failed, you may need to `export BOCKER_BUILDKIT=0`
 
 # Reference Documentation:
 
 * [kind](https://kind.sigs.k8s.io/) installed
 * [Helm Quickstart](https://helm.sh/docs/intro/quickstart/)
-* [tilt](https://docs.tilt.dev/)
+* [tilt](https://docs.tilt.dev/) installed
 * [ambassador](https://www.getambassador.io/docs/)
 * [metallb](https://metallb.universe.tf/)
+
+## Demo More Reading
+* [vault](https://learn.hashicorp.com/vault/getting-started-k8s/sidecar)
+* [vault-annotations](https://www.vaultproject.io/docs/platform/k8s/injector/index.html#annotations)
 
 # Dependency
 
