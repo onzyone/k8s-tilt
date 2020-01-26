@@ -4,21 +4,35 @@
 
 # TODO only install metallb only if running in a local env like kind (metallb is used for a local LB)
 print('Installing metallb')
+
+# this will deploy with helm, need to put a switch in place to check for start / stop 
+# start:
+# local("helm install -f helm-values/metallb/values-local.yaml tilt-metallb stable/metallb")
+# if change:
+# local("helm upgrade -f helm-values/metallb/values-local.yaml tilt-metallb stable/metallb")
+# if stop:
+# local("helm install -f helm-values/metallb/values-local.yaml tilt-metallb stable/metallb")
+
 yaml_metallb = helm(
   'charts/stable/metallb',
   # The release name, equivalent to helm --name
   name='tilt-metallb',
   # The namespace to install in, equivalent to helm --namespace
-  namespace='ambassador',
+  namespace='default',
   # The values file to substitute into the chart.
   values=['./helm-values/metallb/values-local.yaml'],
-  # Values to set from the command-line
-  # set=['service.port=1234', 'ingress.enabled=true']
   )
 k8s_yaml(yaml_metallb)
+watch_file('charts/stable/metallb')
+watch_file('./helm-values/metallb/values-local.yaml')
+
+# this is needed to ensure that 
 k8s_yaml('helm-values/metallb/km-config.yaml')
 
 print('Installing Ambassador')
+# See above ^^
+# local("helm install -f helm-values/ambassador/values-local.yaml tilt-ambassador stable/ambassador")
+
 yaml_ambassador = helm(
   'charts/stable/ambassador',
   # The release name, equivalent to helm --name
@@ -27,10 +41,10 @@ yaml_ambassador = helm(
   namespace='ambassador',
   # The values file to substitute into the chart.
   values=['./helm-values/ambassador/values-local.yaml'],
-  # Values to set from the command-line
-  # set=['service.port=1234', 'ingress.enabled=true']
   )
 k8s_yaml(yaml_ambassador)
+watch_file('charts/stable/ambassador')
+watch_file('./helm-values/ambassador/values-local.yaml')
 
 print('Installing vault')
 yaml_vault = helm(
@@ -43,14 +57,11 @@ yaml_vault = helm(
   values=['./helm-values/vault-helm/values-local.yaml'],
   )
 k8s_yaml(yaml_vault)
+watch_file('charts/stable/vault-helm')
+watch_file('./helm-values/vault-helm/values-local.yaml')
 
 print('Init Vault')
 local_resource('vault-init', cmd='vault-demo/sbin/vault-local.sh', resource_deps=['tilt-vault-helm'])
-
-print('Installing vault demo app')
-# the names from k8s deployment are used here
-k8s_resource('vault-app', resource_deps=['vault-init'])
-k8s_yaml('vault-demo/k8s/app.yaml')
 
 print('Installing consul')
 yaml_consul = helm(
@@ -63,33 +74,5 @@ yaml_consul = helm(
   values=['./helm-values/consul-helm/values-local.yaml'],
   )
 k8s_yaml(yaml_consul)
-
-print('Installing consul demo app')
-k8s_yaml('consul-demo/k8s/counting.yaml')
-k8s_yaml('consul-demo/k8s/dashboard.yaml')
-
-# oneup app with no ingress, just port mapping
-print('Deplying the oneup app')
-# HACK: load namespaces on `tilt up` but not on `tilt down`
-# this is taken from: https://github.com/windmilleng/tilt/blob/master/integration/Tiltfile
-load_namespace = not os.environ.get('SKIP_NAMESPACE', '')
-if load_namespace:
-  k8s_yaml('oneup/k8s/namespace.yaml')
-
-docker_build('oneup', './oneup')
-k8s_yaml('oneup/k8s/oneup.yaml')
-k8s_resource('oneup', port_forwards=8100)
-
-# ambassador tour example
-k8s_yaml('ambassador-tour/k8s/tour.yaml')
-
-# basic go app that returns Data, Time and IP address using Ambassador as ingress
-print('Deplying the basic-ingress app')
-# The name of the image here needs to match what is in your deployment.yaml file
-docker_build('basicingress-ui', './basic-ingress')
-k8s_yaml('basic-ingress/k8s/deployment.yaml')
-k8s_yaml('basic-ingress/k8s/service.yaml')
-# TODO: there is a error related to CRD's, I am not sure how to get tilt to pull in other schemas right now
-# k8s_yaml('basic-ingress/k8s/ingress.yaml')
-# Uncomment to let tilt created a portforward to the service for debuggging
-# k8s_resource('basicingress', port_forwards=8101)
+watch_file('charts/stable/consul-helm')
+watch_file('./helm-values/consul-helm/values-local.yaml')
