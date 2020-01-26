@@ -1,0 +1,5 @@
+include('../Tiltfile')
+
+print('Installing consul demo app')
+k8s_yaml('k8s/counting.yaml')
+k8s_yaml('k8s/dashboard.yaml')
