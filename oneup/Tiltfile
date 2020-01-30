@@ -1,5 +1,3 @@
-include('../Tiltfile')
-
 # oneup app with no ingress, just port mapping
 print('Deplying the oneup app')
 # HACK: load namespaces on `tilt up` but not on `tilt down`

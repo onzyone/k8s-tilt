@@ -1,5 +1,3 @@
-include('../Tiltfile')
-
 print('Installing vault demo app')
 # the names from k8s deployment are used here
 k8s_resource('vault-app', resource_deps=['vault-init'])

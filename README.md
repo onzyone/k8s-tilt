@@ -9,7 +9,7 @@ The goal for this is to setup a local env with a few tools like an ingress contr
    * [Table of contents](#Table-of-Contents)
    * [Usage](#Usage)
       * [Start](#Start)
-      * [Load Balancer](#Load-Balancer)
+      * [Ambassador](#Ambassador)
    * [Troubleshooting](#Troubleshooting)
    * [Reference Documentation](#Reference-Documentation)
    * [Dependency](#Dependency)
@@ -19,6 +19,7 @@ The goal for this is to setup a local env with a few tools like an ingress contr
 # Usage
 
 1. Add a helm chart to the helm folder. I have added a stable folder too to indecate the state of the chart, this allows you to the have an incubator or test folder too.
+1. Each demo app has its own folder and there is a Tiltfile located in there ... as well as a main Tiltfile at the root of this repo
 1. Add an app, in this example `basic-ingress`(basic go app), `oneup` ([from tilt examples](https://github.com/windmilleng/tilt/tree/master/integration/oneup)), and `ambassador-tour` ([from ambassador examples](https://www.getambassador.io/user-guide/getting-started/))
 1. vault demo is based off this page: [injecting-vault-secrets-into-kubernetes-pods-via-a-sidecar](https://www.hashicorp.com/blog/injecting-vault-secrets-into-kubernetes-pods-via-a-sidecar/)
 1. consul deploy is based off this page: [consul kubernetes minikube](https://learn.hashicorp.com/consul/kubernetes/minikube)
@@ -28,8 +29,9 @@ The goal for this is to setup a local env with a few tools like an ingress contr
 1. *note* that helm tempates are converted into yaml and a kubectl apply is run on the yaml object, ie `helm ls` will not show anything
 1. Navigate to the root of this repo after you have cloned it and run `tilt up`
 
-## Load Balancer
-
+### Ambassador
+1. get ingess ip `kubectl get svc --namespace ambassador ambassador -o jsonpath='{.status.loadBalancer.ingress[0].ip}'`
+1. if running ambassador edge stack `https://SERVICE_IP/edge_stack_admin/#dashboard`
 1. get the lb's (currently there should be two, one for consul and one for services behind ambassador)
 1. ```bash 
    $ kubectl get services -A | grep -i loadbalancer
