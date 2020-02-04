@@ -94,9 +94,6 @@ executor:
     # Overrides .images.tag if defined.
     tag: ""
 
-ui_mapping:
-  enabled: true
-
 ui:
   enabled: true
   # only show workflows where UI installed

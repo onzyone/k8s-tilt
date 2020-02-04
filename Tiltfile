@@ -14,7 +14,7 @@ settings = {
 demo_settings = {
   "deploy_demo_ambassador_quote": True,
   "deploy_demo_argo": True,
-  "deploy_demo_basic_ingress": False,
+  "deploy_demo_basic_ingress": True,
   "deploy_demo_consul_demo": False,
   "deploy_demo_oneup": False,
   "deploy_demo_vault_demo": False,
@@ -87,16 +87,6 @@ def deploy_ambassador_edge_gateway():
   #TODO findout why this runs before the crd yaml ^^
   #local("kubectl wait --for=condition=established --timeout=500s customresourcedefinition.apiextensions.k8s.io/authservices.getambassador.io")
   
-#  if bool(os.environ['TILTUP']):
-#    print('Hello TILTUP: {}'.format(os.environ['TILTUP']))
-#    k8s_yaml('helm-values/ambassador-chart/namespace.yaml')
-#    local('helm upgrade --install --wait ambassador charts/stable/ambassador-chart -f helm-values/ambassador-chart/values-local.yaml -n ambassador')
-
-#  if bool(os.environ['TILTDOWN']):
-#    print('Hello TILTDOWN: {}'.format(os.environ['TILTDOWN']))
-#    local('helm uninstall ambassador -n ambassador')
-#    local('kubectl delete ns ambassador')
-
   k8s_yaml('helm-values/ambassador-chart/namespace.yaml')
   yaml_ambassador_edge = helm(
     'charts/stable/ambassador-chart',

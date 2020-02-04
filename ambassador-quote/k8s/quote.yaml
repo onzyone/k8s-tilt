@@ -42,5 +42,5 @@ metadata:
   name: quote-backend
   namespace: ambassador
 spec:
-  prefix: /backend/
+  prefix: /quote/
   service: quote
