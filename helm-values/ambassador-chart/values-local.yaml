@@ -55,7 +55,7 @@ securityContext:
   runAsUser: 8888
 
 image:
-  repository: quay.io/datawire/aes
+  repository: registry:5000/datawire/aes
   tag: 1.0.0
   pullPolicy: IfNotPresent
 

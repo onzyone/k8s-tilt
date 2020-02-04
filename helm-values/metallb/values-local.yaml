@@ -89,7 +89,7 @@ serviceAccounts:
 # controller.
 controller:
   image:
-    repository: metallb/controller
+    repository: registry:5000/metallb/controller
     tag: v0.8.3
     pullPolicy: IfNotPresent
   resources: {}
@@ -104,7 +104,7 @@ controller:
 # daemonset.
 speaker:
   image:
-    repository: metallb/speaker
+    repository: registry:5000/metallb/speaker
     tag: v0.8.3
     pullPolicy: IfNotPresent
   resources: {}

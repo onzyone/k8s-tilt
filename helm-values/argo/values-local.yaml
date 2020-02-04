@@ -94,6 +94,9 @@ executor:
     # Overrides .images.tag if defined.
     tag: ""
 
+ui_mapping:
+  enabled: true
+
 ui:
   enabled: true
   # only show workflows where UI installed
@@ -111,17 +114,7 @@ ui:
   # servicePortName: http
   serviceAccount: argo-ui
   # Annotations to be applied to the UI Service
-  serviceAnnotations:
-    getambassador.io/config: |
-      ---
-      apiVersion: getambassador.io/v2
-      kind: Mapping
-      name: argo_mapping
-      prefix: /argo_ui
-      service: tilt-argo-ui
-      rewrite: /
-#{{ .Release.Name }}-{{ .Values.ui.name }}
-
+  serviceAnnotations: {}
   # Optional labels to add to the UI Service
   serviceLabels: {}
   # Static IP address to assign to loadBalancer

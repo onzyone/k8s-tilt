@@ -1,4 +1,6 @@
 print('Installing argo-workflow')
+
+k8s_yaml('../helm-values/argo/namespace.yaml') 
 yaml_argo = helm(
   '../charts/stable/argo',
   # The release name, equivalent to helm --name

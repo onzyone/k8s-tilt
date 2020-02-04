@@ -2,8 +2,8 @@
 
 # TODO move these to config files
 settings = {
-  "start_kind": False,
-  "preload_images_for_kind": False,
+  "start_kind": True,
+  "preload_images_for_kind": True,
   "deploy_metallb": True,
   "deploy_ambassador_api": False,
   "deploy_ambassador_edge_gateway": True,
@@ -12,12 +12,19 @@ settings = {
 }
 
 demo_settings = {
-  "deploy_demo_ambassador_tour": True,
-  "deploy_demo_argo": False,
+  "deploy_demo_ambassador_quote": True,
+  "deploy_demo_argo": True,
   "deploy_demo_basic_ingress": False,
   "deploy_demo_consul_demo": False,
   "deploy_demo_oneup": False,
   "deploy_demo_vault_demo": False,
+}
+
+# this assumes that you are running a local registry and your images are been pulled from "registry:5000"
+# example:     'repository: registry:5000/datawire/ambassador'
+# https://github.com/onzyone/k8s-kind#troubleshooting
+app_settings = {
+  "local_registry": "localhost:5000"
 }
 
 def deploy_metallb():
@@ -27,6 +34,7 @@ def deploy_metallb():
 
   print('Installing metallb')
 
+  k8s_yaml('helm-values/metallb/namespace.yaml') 
   yaml_metallb = helm(
     'charts/stable/metallb',
     # The release name, equivalent to helm --name
@@ -38,8 +46,6 @@ def deploy_metallb():
     values=['./helm-values/metallb/values-local.yaml'],
     )
   k8s_yaml(yaml_metallb)
-  watch_file('charts/stable/metallb')
-  watch_file('./helm-values/metallb/values-local.yaml')
 
   # this is needed to ensure that 
   k8s_yaml('helm-values/metallb/km-config.yaml')
@@ -68,10 +74,11 @@ def deploy_ambassador_api():
 
 def deploy_ambassador_edge_gateway():
   # This is Ambassador Edge Gateway
-  if settings.get("preload_images_for_kind"):
-    get_images(registry = "quay.io", images = ["datawire/aes:1.0.0"])
 
   print('Installing Ambassador Edge Gateway`')
+
+  if settings.get("preload_images_for_kind"):
+    get_images(registry = "quay.io", images = ["datawire/aes:1.0.0"])
 
   ambassador_edge_crds = listdir("charts/stable/ambassador-chart/crds/")
   for each in ambassador_edge_crds:
@@ -79,7 +86,18 @@ def deploy_ambassador_edge_gateway():
 
   #TODO findout why this runs before the crd yaml ^^
   #local("kubectl wait --for=condition=established --timeout=500s customresourcedefinition.apiextensions.k8s.io/authservices.getambassador.io")
+  
+#  if bool(os.environ['TILTUP']):
+#    print('Hello TILTUP: {}'.format(os.environ['TILTUP']))
+#    k8s_yaml('helm-values/ambassador-chart/namespace.yaml')
+#    local('helm upgrade --install --wait ambassador charts/stable/ambassador-chart -f helm-values/ambassador-chart/values-local.yaml -n ambassador')
 
+#  if bool(os.environ['TILTDOWN']):
+#    print('Hello TILTDOWN: {}'.format(os.environ['TILTDOWN']))
+#    local('helm uninstall ambassador -n ambassador')
+#    local('kubectl delete ns ambassador')
+
+  k8s_yaml('helm-values/ambassador-chart/namespace.yaml')
   yaml_ambassador_edge = helm(
     'charts/stable/ambassador-chart',
     # The release name, equivalent to helm --name
@@ -91,9 +109,6 @@ def deploy_ambassador_edge_gateway():
     )
   k8s_yaml(yaml_ambassador_edge)
   
-#  watch_file('charts/stable/ambassador-chart')
-#  watch_file('./helm-values/ambassador-chart/values-local.yaml')
-
 def deploy_vault():
   if settings.get("preload_images_for_kind"):
     get_images(registry = "docker.io", images = ["hashicorp/vault-k8s:0.1.1", "vault:1.3.1"])
@@ -136,8 +151,11 @@ def deploy_consul():
 
 def get_images(registry, images):
   for image in images:
-      local("docker pull {}/{}".format(registry, image))
-      local("kind load docker-image {}/{}".format(registry, image))
+    local_resource("docker pull from internet", cmd='docker pull {}/{}'.format(registry, image))
+    local_resource("docker tag", cmd='docker tag {}/{} {}/{}'.format(registry, image, app_settings.get("local_registry"), image))
+    local_resource("docker push to local reg", cmd='docker push {}/{}'.format(app_settings.get("local_registry"), image))
+
+#    local_resource("kind load docker-image {}/{}".format(registry, image))
 
 def start_kind():
   print('what a great idea')
@@ -168,8 +186,10 @@ if settings.get("deploy_consul"):
 # demo apps
 ##############################
 
-if demo_settings.get("deploy_demo_ambassador_tour"):
-  include("ambassador-tour/Tiltfile")
+if demo_settings.get("deploy_demo_ambassador_quote"):
+  if settings.get("preload_images_for_kind"):
+    get_images(registry = "quay.io", images = ["datawire/quote:0.2.7"])
+  include("ambassador-quote/Tiltfile")
 
 if demo_settings.get("deploy_demo_argo"):
   include("argo/Tiltfile")
