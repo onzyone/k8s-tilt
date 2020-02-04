@@ -71,7 +71,6 @@ prometheus:
     # enable alertmanager alerts
     enabled: false
 
-
 serviceAccounts:
   controller:
     # Specifies whether a ServiceAccount should be created
@@ -91,7 +90,7 @@ serviceAccounts:
 controller:
   image:
     repository: registry:5000/metallb/controller
-    tag: v0.8.1
+    tag: v0.8.3
     pullPolicy: IfNotPresent
   resources: {}
     # limits:
@@ -106,7 +105,7 @@ controller:
 speaker:
   image:
     repository: registry:5000/metallb/speaker
-    tag: v0.8.1
+    tag: v0.8.3
     pullPolicy: IfNotPresent
   resources: {}
     # limits:

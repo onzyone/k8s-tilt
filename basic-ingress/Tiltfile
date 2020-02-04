@@ -1,12 +1,9 @@
-include('../Tiltfile')
-
 # basic go app that returns Data, Time and IP address using Ambassador as ingress
 print('Deplying the basic-ingress app')
 # The name of the image here needs to match what is in your deployment.yaml file
 docker_build('basicingress-ui', '.')
 k8s_yaml('k8s/deployment.yaml')
 k8s_yaml('k8s/service.yaml')
-# TODO: there is a error related to CRD's, I am not sure how to get tilt to pull in other schemas right now
-# k8s_yaml('k8s/ingress.yaml')
+k8s_yaml('k8s/ingress.yaml')
 # Uncomment to let tilt created a portforward to the service for debuggging
 # k8s_resource('basicingress', port_forwards=8101)

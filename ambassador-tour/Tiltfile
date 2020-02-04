@@ -1,4 +1,0 @@
-include('../Tiltfile')
-
-# ambassador tour example
-k8s_yaml('k8s/tour.yaml')

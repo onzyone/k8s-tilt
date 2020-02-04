@@ -1,0 +1,13 @@
+print('Installing argo-workflow')
+
+k8s_yaml('../helm-values/argo/namespace.yaml') 
+yaml_argo = helm(
+  '../charts/stable/argo',
+  # The release name, equivalent to helm --name
+  name='tilt-argo',
+  # The namespace to install in, equivalent to helm --namespace
+  namespace='argo',
+  # The values file to substitute into the chart.
+  values=['../helm-values/argo/values-local.yaml'],
+  )
+k8s_yaml(yaml_argo)
