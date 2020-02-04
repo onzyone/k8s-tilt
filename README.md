@@ -2,50 +2,74 @@
 
 The goal for this is to setup a local env with a few tools like an ingress controller deployed with helm and hello world app
 
-# Table of Contents
-=================
-<!--ts-->
-   * [Overview](#Overview)
-   * [Table of contents](#Table-of-Contents)
-   * [Usage](#Usage)
-      * [Start](#Start)
-      * [Ambassador](#Ambassador)
-   * [Troubleshooting](#Troubleshooting)
-   * [Reference Documentation](#Reference-Documentation)
-   * [Dependency](#Dependency)
-<!--te-->
-=================
-
-# Usage
-
 1. Add a helm chart to the helm folder. I have added a stable folder too to indecate the state of the chart, this allows you to the have an incubator or test folder too.
 1. Each demo app has its own folder and there is a Tiltfile located in there ... as well as a main Tiltfile at the root of this repo
-1. Add an app, in this example `basic-ingress`(basic go app), `oneup` ([from tilt examples](https://github.com/windmilleng/tilt/tree/master/integration/oneup)), and `ambassador-tour` ([from ambassador examples](https://www.getambassador.io/user-guide/getting-started/))
-1. vault demo is based off this page: [injecting-vault-secrets-into-kubernetes-pods-via-a-sidecar](https://www.hashicorp.com/blog/injecting-vault-secrets-into-kubernetes-pods-via-a-sidecar/)
-1. consul deploy is based off this page: [consul kubernetes minikube](https://learn.hashicorp.com/consul/kubernetes/minikube)
+
+# Table of Contents
+<!--ts-->
+  * [Overview](#Overview)
+  * [Table of contents](#Table-of-Contents)
+  * [Usage](#Usage)
+    * [Start](#Start)
+    * [Stop](#Stop)  
+  * [Demos](#Demos)
+  * [Troubleshooting](#Troubleshooting)
+  * [Reference Documentation](#Reference-Documentation)
+    * [Demo More Reading](#Demo-More-Reading)
+  * [Dependency](#Dependency)
+<!--te-->
+# Usage
+1. In the main Tiltfile there is a group of settings objects
+   * `settings` is used to select what base infra to deploy, such as metallb, ambassador, valut, consul, etc
+   * `demo_settings` is used to select what demo app you want to deploy
+1. *note* that helm tempates are converted into yaml and a kubectl apply is run on the yaml object, ie `helm ls` will not show anything
+1. *note* this Tiltfile assumes that you are running a local docker regestriy that is setup by this [kind start script](https://github.com/onzyone/k8s-kind)
 
 ## Start
-
-1. *note* that helm tempates are converted into yaml and a kubectl apply is run on the yaml object, ie `helm ls` will not show anything
 1. Navigate to the root of this repo after you have cloned it and run `tilt up`
 
-### Ambassador
+## Stop
+1. Either navigate to the root of this repo, or `ctr x` out of the tilt consule, and run `tilt down`
+
+# Demos
+## Ambassador (Ingress controller)
 1. get ingess ip `kubectl get svc --namespace ambassador ambassador -o jsonpath='{.status.loadBalancer.ingress[0].ip}'`
 1. if running ambassador edge stack `https://SERVICE_IP/edge_stack_admin/#dashboard`
-1. get the lb's (currently there should be two, one for consul and one for services behind ambassador)
-1. ```bash 
-   $ kubectl get services -A | grep -i loadbalancer
-   consul        tilt-consul-helm-consul-ui                     LoadBalancer   10.104.97.99     172.17.255.1   80:31878/TCP                                                              35m
-   default       tilt-ambassador                                LoadBalancer   10.98.106.110    172.17.255.2   80:31181/TCP,443:31665/TCP                                                35m
-   ```
-1. open your fav web client and past in the consul external ip. At the url root, you will see consul
-1. open your fav web client and past in the ambassador external ip. At the root, you should see the `ambassador tour` app. At http://<ip>/basicingress, you should see the `basic-ingress` app
+## Ambassador (Quote App)
+1. get ingess ip `INGRESS_IP=$(kubectl get svc --namespace ambassador ambassador -o jsonpath='{.status.loadBalancer.ingress[0].ip}')`
+1. check the quote :)  
+    ```bash 
+    curl -k https://${INGRESS_IP}/quote/
+    {
+        "server": "cavernous-grapefruit-wqjnlbct",
+        "quote": "A small mercy is nothing at all?",
+        "time": "2020-02-04T15:21:55.1482125Z"
+    }
+    ```
+## Basic Ingress Demo
+1. This demo builds the code located in the `basic-ingress/src` folder with the Dockerfile located in `basic-ingress/`
+1. Once the docker build is completed, Tilt will push the image into KIND, and deploy to k8s based on the files located in `basic-ingress/k8s`
+1. get ingess ip `INGRESS_IP=$(kubectl get svc --namespace ambassador ambassador -o jsonpath='{.status.loadBalancer.ingress[0].ip}')`
+1. check the basicingress :)  
+    ```bash 
+    curl -k https://${INGRESS_IP}/basicingress/
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <title>Basic Ingress Demo</title>
+    </head>
+    <body>
+    <p>The data today is 04-02-2020</p>
+    <p>The time right now is 15:30:03</p>
+    <p>The pod IP is 10.244.3.5</p>
+    </body>
+    ```
 
 # Troubleshooting 
 
 1. If you are having issues with local ingress on Mac OS, please look at this: [k8s-kind Troubleshooting](https://github.com/onzyone/k8s-kind#Troubleshooting)
 1. If local docker builds are working, but tilt builds are failing. Try to build the image with the following:
-   ```bash
+  ```bash
    $ tilt docker build .
    Running Docker command as:
    DOCKER_BUILDKIT=1 docker build . 
@@ -63,8 +87,14 @@ The goal for this is to setup a local env with a few tools like an ingress contr
 * [metallb](https://metallb.universe.tf/)
 
 ## Demo More Reading
+### Ambassador
+* [quote](https://www.getambassador.io/user-guide/getting-started/)
+### Vault
 * [vault](https://learn.hashicorp.com/vault/getting-started-k8s/sidecar)
 * [vault-annotations](https://www.vaultproject.io/docs/platform/k8s/injector/index.html#annotations)
+* [injecting-vault-secrets-into-kubernetes-pods-via-a-sidecar](https://www.hashicorp.com/blog/injecting-vault-secrets-into-kubernetes-pods-via-a-sidecar/)
+### consul
+* [consul kubernetes minikube](https://learn.hashicorp.com/consul/kubernetes/minikube)
 
 # Dependency
 

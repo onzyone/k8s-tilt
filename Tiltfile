@@ -7,13 +7,13 @@ settings = {
   "deploy_metallb": True,
   "deploy_ambassador_api": False,
   "deploy_ambassador_edge_gateway": True,
-  "deploy_vault": False,
-  "deploy_consul": False,
+  "deploy_vault": True,
+  "deploy_consul": True,
 }
 
 demo_settings = {
-  "deploy_demo_ambassador_quote": True,
-  "deploy_demo_argo": True,
+  "deploy_demo_ambassador_quote": False,
+  "deploy_demo_argo": False,
   "deploy_demo_basic_ingress": False,
   "deploy_demo_consul_demo": False,
   "deploy_demo_oneup": False,
@@ -34,7 +34,7 @@ def deploy_metallb():
 
   print('Installing metallb')
 
-  k8s_yaml('helm-values/metallb/namespace.yaml') 
+  k8s_yaml('helm-values/metallb/namespace.yaml')
   yaml_metallb = helm(
     'charts/stable/metallb',
     # The release name, equivalent to helm --name
@@ -87,16 +87,6 @@ def deploy_ambassador_edge_gateway():
   #TODO findout why this runs before the crd yaml ^^
   #local("kubectl wait --for=condition=established --timeout=500s customresourcedefinition.apiextensions.k8s.io/authservices.getambassador.io")
   
-#  if bool(os.environ['TILTUP']):
-#    print('Hello TILTUP: {}'.format(os.environ['TILTUP']))
-#    k8s_yaml('helm-values/ambassador-chart/namespace.yaml')
-#    local('helm upgrade --install --wait ambassador charts/stable/ambassador-chart -f helm-values/ambassador-chart/values-local.yaml -n ambassador')
-
-#  if bool(os.environ['TILTDOWN']):
-#    print('Hello TILTDOWN: {}'.format(os.environ['TILTDOWN']))
-#    local('helm uninstall ambassador -n ambassador')
-#    local('kubectl delete ns ambassador')
-
   k8s_yaml('helm-values/ambassador-chart/namespace.yaml')
   yaml_ambassador_edge = helm(
     'charts/stable/ambassador-chart',
@@ -110,10 +100,11 @@ def deploy_ambassador_edge_gateway():
   k8s_yaml(yaml_ambassador_edge)
   
 def deploy_vault():
+  print('Installing vault')
   if settings.get("preload_images_for_kind"):
     get_images(registry = "docker.io", images = ["hashicorp/vault-k8s:0.1.1", "vault:1.3.1"])
 
-  print('Installing vault')
+  k8s_yaml('helm-values/vault-helm/namespace.yaml')
   yaml_vault = helm(
     'charts/stable/vault-helm',
     # The release name, equivalent to helm --name
@@ -131,10 +122,11 @@ def deploy_vault():
   local_resource('vault-init', cmd='vault-demo/sbin/vault-local.sh', resource_deps=['tilt-vault-helm'])
 
 def deploy_consul():
+  print('Installing consul')
   if settings.get("preload_images_for_kind"):
     get_images(registry = "docker.io", images = ["hashicorp/consul-k8s:0.10.1", "consul:1.6.2"])
-
-  print('Installing consul')
+    
+  k8s_yaml('helm-values/consul-helm/namespace.yaml')
   yaml_consul = helm(
     'charts/stable/consul-helm',
     # The release name, equivalent to helm --name
@@ -148,12 +140,11 @@ def deploy_consul():
   watch_file('charts/stable/consul-helm')
   watch_file('./helm-values/consul-helm/values-local.yaml')
 
-
 def get_images(registry, images):
   for image in images:
-    local_resource("docker pull from internet", cmd='docker pull {}/{}'.format(registry, image))
-    local_resource("docker tag", cmd='docker tag {}/{} {}/{}'.format(registry, image, app_settings.get("local_registry"), image))
-    local_resource("docker push to local reg", cmd='docker push {}/{}'.format(app_settings.get("local_registry"), image))
+    local_resource("docker pull {} from internet".format(image), cmd='docker pull {}/{}'.format(registry, image))
+    local_resource("docker tag {}".format(image), cmd='docker tag {}/{} {}/{}'.format(registry, image, app_settings.get("local_registry"), image))
+    local_resource("docker push {} to local registry".format(image), cmd='docker push {}/{}'.format(app_settings.get("local_registry"), image))
 
 #    local_resource("kind load docker-image {}/{}".format(registry, image))
 
