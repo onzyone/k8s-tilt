@@ -1,0 +1,9 @@
+---
+apiVersion: getambassador.io/v2
+kind: ConsulResolver
+metadata:
+  name: tiltdc-dc1
+  namespace: consul
+spec:
+  address: consul-server.default.svc.cluster.local:8500
+  datacenter: tiltdc

@@ -4,7 +4,7 @@ print('Deplying the basic-ingress app')
 docker_build('basicingress-ui', '.')
 k8s_yaml('k8s/deployment.yaml')
 k8s_yaml('k8s/service.yaml')
-k8s_yaml('k8s/ingress.yaml')
+k8s_yaml('k8s/mapping.yaml')
 watch_file ('src') 
 
 # Uncomment to let tilt created a portforward to the service for debuggging

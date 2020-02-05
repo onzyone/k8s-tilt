@@ -7,7 +7,7 @@ settings = {
   "deploy_metallb": True,
   "deploy_ambassador_api": False,
   "deploy_ambassador_edge_gateway": True,
-  "deploy_vault": True,
+  "deploy_vault": False,
   "deploy_consul": True,
 }
 
@@ -15,7 +15,7 @@ demo_settings = {
   "deploy_demo_ambassador_quote": False,
   "deploy_demo_argo": False,
   "deploy_demo_basic_ingress": False,
-  "deploy_demo_consul_demo": False,
+  "deploy_demo_consul_demo": True,
   "deploy_demo_oneup": False,
   "deploy_demo_vault_demo": False,
 }
@@ -34,6 +34,7 @@ def deploy_metallb():
 
   print('Installing metallb')
 
+  # TODO for all namespace, they need to be run before anything else ...
   k8s_yaml('helm-values/metallb/namespace.yaml')
   yaml_metallb = helm(
     'charts/stable/metallb',
@@ -108,7 +109,7 @@ def deploy_vault():
   yaml_vault = helm(
     'charts/stable/vault-helm',
     # The release name, equivalent to helm --name
-    name='tilt-vault-helm',
+    name='vault-helm',
     # The namespace to install in, equivalent to helm --namespace
     namespace='vault',
     # The values file to substitute into the chart.
@@ -118,8 +119,7 @@ def deploy_vault():
   watch_file('charts/stable/vault-helm')
   watch_file('./helm-values/vault-helm/values-local.yaml')
 
-  print('Init Vault')
-  local_resource('vault-init', cmd='vault-demo/sbin/vault-local.sh', resource_deps=['tilt-vault-helm'])
+  local_resource('vault-init', cmd='vault-demo/sbin/vault-local.sh', resource_deps=['vault-helm'])
 
 def deploy_consul():
   print('Installing consul')
@@ -130,7 +130,7 @@ def deploy_consul():
   yaml_consul = helm(
     'charts/stable/consul-helm',
     # The release name, equivalent to helm --name
-    name='tilt-consul-helm',
+    name='consul-helm',
     # The namespace to install in, equivalent to helm --namespace
     namespace='consul',
     # The values file to substitute into the chart.
@@ -139,6 +139,8 @@ def deploy_consul():
   k8s_yaml(yaml_consul)
   watch_file('charts/stable/consul-helm')
   watch_file('./helm-values/consul-helm/values-local.yaml')
+
+  k8s_yaml("helm-values/consul-helm/ambassador-crd.yaml")
 
 def get_images(registry, images):
   for image in images:
@@ -180,6 +182,7 @@ if settings.get("deploy_consul"):
 if demo_settings.get("deploy_demo_ambassador_quote"):
   if settings.get("preload_images_for_kind"):
     get_images(registry = "quay.io", images = ["datawire/quote:0.2.7"])
+
   include("ambassador-quote/Tiltfile")
 
 if demo_settings.get("deploy_demo_argo"):
@@ -189,18 +192,17 @@ if demo_settings.get("deploy_demo_basic_ingress"):
   include("basic-ingress/Tiltfile")
 
 if demo_settings.get("deploy_demo_consul_demo"):
-  include("consule-demo/Tiltfile")
+  if settings.get("preload_images_for_kind"):
+    get_images(registry = "docker.io", images = ["hashicorp/counting-service:0.0.2", "hashicorp/dashboard-service:0.0.4"])
+
+#TODO ensure consul is running before running this
+  include("consul-demo/Tiltfile")
 
 if demo_settings.get("deploy_demo_oneup"):
   include("oneup/Tiltfile")
 
 if demo_settings.get("deploy_demo_vault_demo"):
-  include("vault-demo/Tiltfile")
+  if settings.get("preload_images_for_kind"):
+    get_images(registry = "docker.io", images = ["jweissig/app:0.0.1"])
 
-# this will deploy with helm, need to put a switch in place to check for start / stop 
-# start:
-# local("helm install -f helm-values/metallb/values-local.yaml tilt-metallb stable/metallb")
-# if change:
-# local("helm upgrade -f helm-values/metallb/values-local.yaml tilt-metallb stable/metallb")
-# if stop:
-# local("helm uninstall -f helm-values/metallb/values-local.yaml tilt-metallb stable/metallb")
+  include("vault-demo/Tiltfile")
