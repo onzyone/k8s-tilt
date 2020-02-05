@@ -1,0 +1,14 @@
+---
+apiVersion: getambassador.io/v2
+kind: Mapping
+metadata:
+  name: consuldashboard-mapping
+  namespace: consul
+  labels:
+    app: consuldashboard
+spec:
+  prefix: /consuldashboard/
+  service: consuldashboard
+  resolver: tiltdc
+  load_balancer:
+    policy: round_robin

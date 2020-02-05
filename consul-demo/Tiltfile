@@ -1,3 +1,10 @@
+# This is the tilefile to deploy the consul counting demo app
+
 print('Installing consul demo app')
-k8s_yaml('k8s/counting.yaml')
-k8s_yaml('k8s/dashboard.yaml')
+
+k8s_yaml("k8s/counting-serviceaccount.yaml")
+k8s_yaml("k8s/dashboard-serviceaccount.yaml")
+
+consul_demo = listdir("k8s/")
+for each in consul_demo:
+  k8s_yaml(each)
