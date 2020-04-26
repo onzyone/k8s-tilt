@@ -13,5 +13,5 @@ spec:
     targetPort: 9002
   selector:
     app: consuldashboard
-  # type: "LoadBalancer"
-  # loadBalancerIP: ""
+  type: "LoadBalancer"
+  loadBalancerIP: ""

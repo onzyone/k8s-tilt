@@ -64,6 +64,7 @@ The goal for this is to setup a local env with a few tools like an ingress contr
     <p>The pod IP is 10.244.3.5</p>
     </body>
     ```
+## Rancher
 
 # Troubleshooting 
 

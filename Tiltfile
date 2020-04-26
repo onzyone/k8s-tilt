@@ -8,15 +8,16 @@ settings = {
   "deploy_ambassador_api": False,
   "deploy_ambassador_edge_gateway": True,
   "deploy_vault": False,
-  "deploy_consul": True,
+  "deploy_consul": False,
 }
 
 demo_settings = {
   "deploy_demo_ambassador_quote": False,
   "deploy_demo_argo": False,
-  "deploy_demo_basic_ingress": False,
-  "deploy_demo_consul_demo": True,
+  "deploy_demo_basic_ingress": True,
+  "deploy_demo_consul_demo": False,
   "deploy_demo_oneup": False,
+  "deploy_demo_rancher": True,
   "deploy_demo_vault_demo": False,
 }
 
@@ -81,6 +82,7 @@ def deploy_ambassador_edge_gateway():
   if settings.get("preload_images_for_kind"):
     get_images(registry = "quay.io", images = ["datawire/aes:1.0.0"])
 
+  k8s_yaml('helm-values/ambassador-chart/namespace.yaml')
   ambassador_edge_crds = listdir("charts/stable/ambassador-chart/crds/")
   for each in ambassador_edge_crds:
     k8s_yaml(each)
@@ -88,7 +90,6 @@ def deploy_ambassador_edge_gateway():
   #TODO findout why this runs before the crd yaml ^^
   #local("kubectl wait --for=condition=established --timeout=500s customresourcedefinition.apiextensions.k8s.io/authservices.getambassador.io")
   
-  k8s_yaml('helm-values/ambassador-chart/namespace.yaml')
   yaml_ambassador_edge = helm(
     'charts/stable/ambassador-chart',
     # The release name, equivalent to helm --name
@@ -142,6 +143,28 @@ def deploy_consul():
 
   k8s_yaml("helm-values/consul-helm/ambassador-crd.yaml")
 
+def deploy_rancher():
+  print('Installing Rancher')
+  if settings.get("preload_images_for_kind"):
+    get_images(registry = "docker.io", images = ["hashicorp/consul-k8s:0.10.1", "consul:1.6.2"])
+    
+  k8s_yaml('helm-values/rancher/namespace.yaml')
+  yaml_consul = helm(
+    'charts/stable/consul-helm',
+    # The release name, equivalent to helm --name
+    name='consul-helm',
+    # The namespace to install in, equivalent to helm --namespace
+    namespace='consul',
+    # The values file to substitute into the chart.
+    values=['./helm-values/consul-helm/values-local.yaml'],
+    )
+  k8s_yaml(yaml_consul)
+  watch_file('charts/stable/consul-helm')
+  watch_file('./helm-values/consul-helm/values-local.yaml')
+
+  k8s_yaml("helm-values/consul-helm/ambassador-crd.yaml")
+
+
 def get_images(registry, images):
   for image in images:
     local_resource("docker pull {} from internet".format(image), cmd='docker pull {}/{}'.format(registry, image))
@@ -149,6 +172,8 @@ def get_images(registry, images):
     local_resource("docker push {} to local registry".format(image), cmd='docker push {}/{}'.format(app_settings.get("local_registry"), image))
 
 #    local_resource("kind load docker-image {}/{}".format(registry, image))
+
+
 
 def start_kind():
   print('what a great idea')
