@@ -1,0 +1,26 @@
+# if this is not working please look at the troubleshooting section in k8s-kind (https://github.com/onzyone/k8s-kind)
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: metallb-system
+  name: config
+data:
+  config: |
+    address-pools:
+    - name: default
+      protocol: layer2
+      addresses:
+      - 172.17.255.1-172.17.255.200
+
+
+# metadata:
+#   namespace: metallb-system
+#   name: config
+# data:
+#   config: |
+#     address-pools:
+#     - name: default
+#       protocol: layer2
+#       addresses:
+#       - 172.17.255.1-172.17.255.200

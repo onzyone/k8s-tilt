@@ -2,8 +2,8 @@
 # if you update the datacenter here, you have to update the ambassador-crd.yaml and consul-demo/k8s/dashboard-mapping
 global:
   datacenter: tiltdc
-  image: "registry:5000/consul:1.6.2"
-  imageK8S: "registry:5000/hashicorp/consul-k8s:0.10.1"
+  image: "localhost:5000/consul:1.6.2"
+  imageK8S: "localhost:5000/hashicorp/consul-k8s:0.10.1"
 
 # Enable the Consul Web UI via a NodePort
 ui:

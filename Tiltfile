@@ -8,20 +8,21 @@ settings = {
   "deploy_ambassador_api": False,
   "deploy_ambassador_edge_gateway": True,
   "deploy_vault": False,
-  "deploy_consul": True,
+  "deploy_consul": False,
 }
 
 demo_settings = {
-  "deploy_demo_ambassador_quote": False,
+  "deploy_demo_ambassador_quote": True,
   "deploy_demo_argo": False,
   "deploy_demo_basic_ingress": False,
-  "deploy_demo_consul_demo": True,
+  "deploy_demo_consul_demo": False,
   "deploy_demo_oneup": False,
   "deploy_demo_vault_demo": False,
+  "deploy_demo_polaris": False,
 }
 
-# this assumes that you are running a local registry and your images are been pulled from "registry:5000"
-# example:     'repository: registry:5000/datawire/ambassador'
+# this assumes that you are running a local registry and your images are been pulled from "localhost:5000"
+# example:     'repository: localhost:5000/datawire/ambassador'
 # https://github.com/onzyone/k8s-kind#troubleshooting
 app_settings = {
   "local_registry": "localhost:5000"
@@ -30,26 +31,9 @@ app_settings = {
 def deploy_metallb():
   # TODO only install metallb only if running in a local env like kind (metallb is used for a local LB)
   if settings.get("preload_images_for_kind"):
-    get_images(registry = "docker.io", images = ["metallb/controller:v0.8.3", "metallb/speaker:v0.8.3"])
-
-  print('Installing metallb')
-
-  # TODO for all namespace, they need to be run before anything else ...
-  k8s_yaml('helm-values/metallb/namespace.yaml')
-  yaml_metallb = helm(
-    'charts/stable/metallb',
-    # The release name, equivalent to helm --name
-    name='metallb',
-    # The namespace to install in, equivalent to helm --namespace
-    # if namesapce is updated, update "helm-values/metallb/km-config.yaml" too    
-    namespace='metallb',
-    # The values file to substitute into the chart.
-    values=['./helm-values/metallb/values-local.yaml'],
-    )
-  k8s_yaml(yaml_metallb)
-
-  # this is needed to ensure that 
-  k8s_yaml('helm-values/metallb/km-config.yaml')
+    get_images(registry = "docker.io", images = ["metallb/controller:v0.9.3", "metallb/speaker:v0.9.3"])
+  
+  include("metallb/Tiltfile")
 
 def deploy_ambassador_api():
   ## This is Ambassador API Gateway
@@ -76,29 +60,15 @@ def deploy_ambassador_api():
 def deploy_ambassador_edge_gateway():
   # This is Ambassador Edge Gateway
 
-  print('Installing Ambassador Edge Gateway`')
+  print('Installing Ambassador Edge Gateway')
 
+  # donwload images:
   if settings.get("preload_images_for_kind"):
-    get_images(registry = "quay.io", images = ["datawire/aes:1.0.0"])
-
-  ambassador_edge_crds = listdir("charts/stable/ambassador-chart/crds/")
-  for each in ambassador_edge_crds:
-    k8s_yaml(each)
-
-  #TODO findout why this runs before the crd yaml ^^
-  #local("kubectl wait --for=condition=established --timeout=500s customresourcedefinition.apiextensions.k8s.io/authservices.getambassador.io")
-  
-  k8s_yaml('helm-values/ambassador-chart/namespace.yaml')
-  yaml_ambassador_edge = helm(
-    'charts/stable/ambassador-chart',
-    # The release name, equivalent to helm --name
-    name='ambassador',
-    # The namespace to install in, equivalent to helm --namespace
-    namespace='ambassador',
-    # The values file to substitute into the chart.
-    values=['./helm-values/ambassador-chart/values-local.yaml'],
-    )
-  k8s_yaml(yaml_ambassador_edge)
+    get_images(registry = "quay.io", images = ["datawire/aes:1.4.2"])
+  local("helm repo add datawire https://www.getambassador.io")
+  local("kubectl create ns ambassador")
+  #k8s_yaml("./helm-values/ambassador-chart/namespace.yaml")
+  local("helm install ambassador --namespace ambassador datawire/ambassador --set image.repository=localhost:5000/datawire/aes --set image.tag=1.4.2")
   
 def deploy_vault():
   print('Installing vault')
@@ -106,6 +76,7 @@ def deploy_vault():
     get_images(registry = "docker.io", images = ["hashicorp/vault-k8s:0.1.1", "vault:1.3.1"])
 
   k8s_yaml('helm-values/vault-helm/namespace.yaml')
+
   yaml_vault = helm(
     'charts/stable/vault-helm',
     # The release name, equivalent to helm --name
@@ -116,6 +87,7 @@ def deploy_vault():
     values=['./helm-values/vault-helm/values-local.yaml'],
     )
   k8s_yaml(yaml_vault)
+
   watch_file('charts/stable/vault-helm')
   watch_file('./helm-values/vault-helm/values-local.yaml')
 
@@ -206,3 +178,9 @@ if demo_settings.get("deploy_demo_vault_demo"):
     get_images(registry = "docker.io", images = ["jweissig/app:0.0.1"])
 
   include("vault-demo/Tiltfile")
+
+if demo_settings.get("deploy_demo_polaris"):
+  if settings.get("preload_images_for_kind"):
+    get_images(registry = "quay.io", images = ["fairwinds/polaris:0.6"])
+
+  include("polaris/Tiltfile")

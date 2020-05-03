@@ -1,0 +1,18 @@
+# isntall metallb from k8s files
+
+print('Installing metallb')
+
+load_namespace = True
+if load_namespace:
+  k8s_yaml('k8s/namespace.yaml')
+
+# as of metallb 0.8.2 helm chart is depricated (https://metallb.universe.tf/release-notes/)
+k8s_yaml('k8s/metallb.yaml')
+
+# TODO: get this to be more dynamic :)
+#local("kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"")
+k8s_yaml('k8s/secret.yaml')
+
+# this is needed to ensure that metallb can talk to docker
+#k8s_resource('km-config', resource_deps=['metallb'])
+k8s_yaml('k8s/km-config.yaml')

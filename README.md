@@ -5,6 +5,10 @@ The goal for this is to setup a local env with a few tools like an ingress contr
 1. Add a helm chart to the helm folder. I have added a stable folder too to indecate the state of the chart, this allows you to the have an incubator or test folder too.
 1. Each demo app has its own folder and there is a Tiltfile located in there ... as well as a main Tiltfile at the root of this repo
 
+### Confirmed working with:
+* kind: `v0.8.1`
+* tilt: `v0.13.4`
+
 # Table of Contents
 <!--ts-->
   * [Overview](#Overview)
@@ -27,6 +31,7 @@ The goal for this is to setup a local env with a few tools like an ingress contr
 
 ## Start
 1. Navigate to the root of this repo after you have cloned it and run `tilt up`
+   * *NOTE* you can Start without hud, web gui, and watching your files `tilt up --hud=false --no-browser --watch=false`
 
 ## Stop
 1. Either navigate to the root of this repo, or `ctr x` out of the tilt consule, and run `tilt down`
