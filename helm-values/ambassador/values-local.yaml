@@ -48,7 +48,7 @@
     runAsUser: 8888
   
   image:
-    repository: registry:5000/datawire/ambassador
+    repository: localhost:5000/datawire/ambassador
     tag: 0.86.1
     pullPolicy: IfNotPresent
   

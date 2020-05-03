@@ -13,7 +13,7 @@ metadata:
 spec:
   containers:
   - name: consuldashboard
-    image: registry:5000/hashicorp/dashboard-service:0.0.4
+    image: localhost:5000/hashicorp/dashboard-service:0.0.4
     ports:
     - containerPort: 9002
       name: http
