@@ -213,7 +213,7 @@ spec:
   selector:
     app: polaris
     component: dashboard
-  type: ClusterIP
+  type: LoadBalancer
 ---
 # Source: polaris/templates/dashboard.deployment.yaml
 apiVersion: apps/v1
