@@ -12,15 +12,3 @@ data:
       protocol: layer2
       addresses:
       - 172.17.255.1-172.17.255.200
-
-
-# metadata:
-#   namespace: metallb-system
-#   name: config
-# data:
-#   config: |
-#     address-pools:
-#     - name: default
-#       protocol: layer2
-#       addresses:
-#       - 172.17.255.1-172.17.255.200

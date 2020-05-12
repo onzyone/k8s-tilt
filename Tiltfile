@@ -6,19 +6,19 @@ settings = {
   "preload_images_for_kind": True,
   "deploy_metallb": True,
   "deploy_ambassador_api": False,
-  "deploy_ambassador_edge_gateway": True,
+  "deploy_ambassador_edge_gateway": False,
   "deploy_vault": False,
   "deploy_consul": False,
 }
 
 demo_settings = {
-  "deploy_demo_ambassador_quote": True,
+  "deploy_demo_ambassador_quote": False,
   "deploy_demo_argo": False,
   "deploy_demo_basic_ingress": False,
   "deploy_demo_consul_demo": False,
   "deploy_demo_oneup": False,
   "deploy_demo_vault_demo": False,
-  "deploy_demo_polaris": False,
+  "deploy_demo_polaris": True,
 }
 
 # this assumes that you are running a local registry and your images are been pulled from "localhost:5000"
