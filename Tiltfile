@@ -4,11 +4,12 @@
 settings = {
   "start_kind": True,
   "preload_images_for_kind": True,
-  "deploy_metallb": True,
+  "deploy_metallb": False,
   "deploy_ambassador_api": False,
   "deploy_ambassador_edge_gateway": False,
   "deploy_vault": False,
   "deploy_consul": False,
+  "deploy_tekton": True,
 }
 
 demo_settings = {
@@ -114,6 +115,10 @@ def deploy_consul():
 
   k8s_yaml("helm-values/consul-helm/ambassador-crd.yaml")
 
+def deploy_tekton():
+  print('Installing tekton')
+  include("tekton/Tiltfile")
+
 def get_images(registry, images):
   for image in images:
     local_resource("docker pull {} from internet".format(image), cmd='docker pull {}/{}'.format(registry, image))
@@ -146,6 +151,9 @@ if settings.get("deploy_vault"):
   
 if settings.get("deploy_consul"):
   deploy_consul()
+
+if settings.get("deploy_tekton"):
+  deploy_tekton()
 
 ##############################
 # demo apps

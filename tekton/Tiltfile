@@ -1,0 +1,5 @@
+
+# https://github.com/FairwindsOps/polaris
+k8s_yaml('k8s/release.yaml')
+
+k8s_resource('tekton-pipelines-webhook', port_forwards=['9090:9090', '8008:8008', '8443:443'])
