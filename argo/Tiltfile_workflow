@@ -1,0 +1,4 @@
+print('Installing argo-workflow')
+
+k8s_yaml('k8s/namespace.yaml')
+k8s_yaml('k8s/argorollouts/install.yaml')

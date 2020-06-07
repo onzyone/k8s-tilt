@@ -1,6 +1,24 @@
+---
+# used for argo workflow
 apiVersion: v1
 kind: Namespace
 metadata:
   name: argo
   labels:
     name: argo
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argo-rollouts
+  labels:
+    name: argo-rollouts
+    
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argo-cd
+  labels:
+    name: argo-cd

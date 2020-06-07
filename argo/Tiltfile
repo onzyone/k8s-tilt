@@ -5,13 +5,11 @@ k8s_yaml('k8s/namespace.yaml')
 yaml_argo = helm(
   '../charts/stable/argo',
   # The release name, equivalent to helm --name
-  name='tilt-argo',
+  name='argo',
   # The namespace to install in, equivalent to helm --namespace
-  namespace='argo',
+  namespace='kube-system',
   # The values file to substitute into the chart.
   values=['../helm-values/argo/values-local.yaml'],
   )
 
 k8s_yaml(yaml_argo)
-
-k8s_yaml('k8s/ui-mapping.yaml')

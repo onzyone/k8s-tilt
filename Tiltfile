@@ -4,7 +4,7 @@
 settings = {
   "start_kind": True,
   "preload_images_for_kind": True,
-  "deploy_metallb": True,
+  "deploy_metallb": False,
   "deploy_ambassador_api": False,
   "deploy_ambassador_edge_gateway": False,
   "deploy_vault": False,
@@ -13,12 +13,14 @@ settings = {
 
 demo_settings = {
   "deploy_demo_ambassador_quote": False,
-  "deploy_demo_argo": False,
+  "deploy_demo_argo": True,
+  "deploy_demo_argo_cd": True,
+  "deploy_demo_argo_rollouts": True,
   "deploy_demo_basic_ingress": False,
   "deploy_demo_consul_demo": False,
   "deploy_demo_oneup": False,
   "deploy_demo_vault_demo": False,
-  "deploy_demo_polaris": True,
+  "deploy_demo_polaris": False,
 }
 
 # this assumes that you are running a local registry and your images are been pulled from "localhost:5000"
@@ -159,6 +161,20 @@ if demo_settings.get("deploy_demo_ambassador_quote"):
 
 if demo_settings.get("deploy_demo_argo"):
   include("argo/Tiltfile")
+
+if demo_settings.get("deploy_demo_argo_cd"):
+  if settings.get("preload_images_for_kind"):
+    get_images(registry = "docker.io", images = ["argoproj/argocd:v1.5.3", "redis:5.0.3"])
+  if settings.get("preload_images_for_kind"):
+    get_images(registry = "quay.io", images = ["dexidp/dex:v2.22.0"])
+
+  include("argo/Tiltfile_cd")
+
+if demo_settings.get("deploy_demo_argo_rollouts"):
+  if settings.get("preload_images_for_kind"):
+    get_images(registry = "quay.io", images = ["datawire/quote:0.2.7"])
+
+  include("argo/Tiltfile_rollouts")
 
 if demo_settings.get("deploy_demo_basic_ingress"):
   include("basic-ingress/Tiltfile")

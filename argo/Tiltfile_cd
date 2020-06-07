@@ -1,0 +1,4 @@
+print('Installing argo-cd')
+
+k8s_yaml('k8s/namespace.yaml')
+k8s_yaml('k8s/argocd/install.yaml')
