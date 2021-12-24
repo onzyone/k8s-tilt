@@ -2,9 +2,9 @@
 
 # TODO move these to config files
 settings = {
-  "start_kind": True,
-  "preload_images_for_kind": True,
-  "deploy_metallb": True,
+  "start_kind": False,
+  "preload_images_for_kind": False,
+  "deploy_metallb": False,
   "deploy_ambassador_api": False,
   "deploy_ambassador_edge_gateway": False,
   "deploy_vault": False,
@@ -32,7 +32,7 @@ def deploy_metallb():
   # TODO only install metallb only if running in a local env like kind (metallb is used for a local LB)
   if settings.get("preload_images_for_kind"):
     get_images(registry = "docker.io", images = ["metallb/controller:v0.9.3", "metallb/speaker:v0.9.3"])
-  
+
   include("metallb/Tiltfile")
 
 def deploy_ambassador_api():
@@ -69,7 +69,7 @@ def deploy_ambassador_edge_gateway():
   local("kubectl create ns ambassador")
   #k8s_yaml("./helm-values/ambassador-chart/namespace.yaml")
   local("helm install ambassador --namespace ambassador datawire/ambassador --set image.repository=localhost:5000/datawire/aes --set image.tag=1.4.2")
-  
+
 def deploy_vault():
   print('Installing vault')
   if settings.get("preload_images_for_kind"):
@@ -97,7 +97,7 @@ def deploy_consul():
   print('Installing consul')
   if settings.get("preload_images_for_kind"):
     get_images(registry = "docker.io", images = ["hashicorp/consul-k8s:0.10.1", "consul:1.6.2"])
-    
+
   k8s_yaml('helm-values/consul-helm/namespace.yaml')
   yaml_consul = helm(
     'charts/stable/consul-helm',
@@ -143,7 +143,7 @@ if settings.get("deploy_ambassador_edge_gateway"):
 
 if settings.get("deploy_vault"):
   deploy_vault()
-  
+
 if settings.get("deploy_consul"):
   deploy_consul()
 

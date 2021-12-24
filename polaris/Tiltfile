@@ -1,6 +1,6 @@
 
 # https://github.com/FairwindsOps/polaris
 k8s_yaml('k8s/namespace.yaml')
-k8s_yaml('k8s/polaris.yaml')
+k8s_yaml('k8s/dashboard.yaml')
 
-k8s_resource('polaris-dashboard', port_forwards=['8080:80'])
+k8s_resource('polaris-dashboard', port_forwards=['8080:8080'])
