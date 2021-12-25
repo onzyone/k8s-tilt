@@ -3,7 +3,7 @@
 # TODO move these to config files
 settings = {
   "start_kind": False,
-  "preload_images_for_kind": False,
+  "preload_images_for_kind": True,
   "deploy_metallb": False,
   "deploy_ambassador_api": False,
   "deploy_ambassador_edge_gateway": False,
@@ -16,8 +16,8 @@ demo_settings = {
   "deploy_demo_argo": False,
   "deploy_demo_basic_ingress": False,
   "deploy_demo_consul_demo": False,
-  "deploy_demo_oneup": False,
-  "deploy_demo_vault_demo": False,
+  "deploy_demo_oneup": True,
+  "deploy_demo_vault_demo": False, # BROKEN
   "deploy_demo_polaris": True,
 }
 
@@ -116,9 +116,10 @@ def deploy_consul():
 
 def get_images(registry, images):
   for image in images:
-    local_resource("docker pull {} from internet".format(image), cmd='docker pull {}/{}'.format(registry, image))
-    local_resource("docker tag {}".format(image), cmd='docker tag {}/{} {}/{}'.format(registry, image, app_settings.get("local_registry"), image))
-    local_resource("docker push {} to local registry".format(image), cmd='docker push {}/{}'.format(app_settings.get("local_registry"), image))
+    local_resource('echo {}'.format(registry), cmd='echo %s, %s' % (registry, image))
+    local_resource('docker pull {} from internet'.format(image.replace('/','_')), cmd='docker pull {}/{}'.format(registry, image))
+    local_resource('docker tag {}'.format(image.replace('/','_')), cmd='docker tag {}/{} {}/{}'.format(registry, image, app_settings.get("local_registry"), image))
+    local_resource('docker push {} to local registry'.format(image.replace('/','_')), cmd='docker push {}/{}'.format(app_settings.get("local_registry"), image))
 
 #    local_resource("kind load docker-image {}/{}".format(registry, image))
 

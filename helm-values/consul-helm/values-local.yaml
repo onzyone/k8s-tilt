@@ -16,7 +16,7 @@ connectInject:
   enabled: true
 
 client:
-  enabled: true  
+  enabled: true
 
 # Use only one Consul server for local development
 server:
@@ -25,4 +25,3 @@ server:
   disruptionBudget:
     enabled: true
     maxUnavailable: 0
-  
