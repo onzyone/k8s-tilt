@@ -1,0 +1,9 @@
+
+# https://doc.traefik.io/traefik/getting-started/install-traefik/
+
+load('ext://helm_resource', 'helm_resource', 'helm_repo')
+helm_repo('traefik', 'https://helm.traefik.io/traefik')
+helm_resource('traefikinstall', 'traefik/traefik', 'namespace=traefik')
+
+
+# kubectl port-forward $(kubectl get pods --selector "app.kubernetes.io/name=traefik" --output=name) 9000:9000 &

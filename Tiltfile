@@ -2,23 +2,24 @@
 
 # TODO move these to config files
 settings = {
-  "start_kind": False,
-  "preload_images_for_kind": True,
-  "deploy_metallb": False,
   "deploy_ambassador_api": False,
   "deploy_ambassador_edge_gateway": False,
-  "deploy_vault": False,
   "deploy_consul": False,
+  "deploy_metallb": False,
+  "deploy_vault": False,
+  "preload_images_for_kind": False,
+  "start_kind": False,
 }
 
 demo_settings = {
   "deploy_demo_ambassador_quote": False,
   "deploy_demo_argo": False,
   "deploy_demo_basic_ingress": False,
-  "deploy_demo_consul_demo": False,
+  "deploy_demo_consul": False,
   "deploy_demo_oneup": True,
-  "deploy_demo_vault_demo": False, # BROKEN
-  "deploy_demo_polaris": True,
+  "deploy_demo_polaris": False,
+  "deploy_demo_vault": False, # BROKEN
+  "deploy_demo_traefik": True,
 }
 
 # this assumes that you are running a local registry and your images are been pulled from "localhost:5000"
@@ -164,7 +165,7 @@ if demo_settings.get("deploy_demo_argo"):
 if demo_settings.get("deploy_demo_basic_ingress"):
   include("basic-ingress/Tiltfile")
 
-if demo_settings.get("deploy_demo_consul_demo"):
+if demo_settings.get("deploy_demo_consul"):
   if settings.get("preload_images_for_kind"):
     get_images(registry = "docker.io", images = ["hashicorp/counting-service:0.0.2", "hashicorp/dashboard-service:0.0.4"])
 
@@ -174,7 +175,7 @@ if demo_settings.get("deploy_demo_consul_demo"):
 if demo_settings.get("deploy_demo_oneup"):
   include("oneup/Tiltfile")
 
-if demo_settings.get("deploy_demo_vault_demo"):
+if demo_settings.get("deploy_demo_vault"):
   if settings.get("preload_images_for_kind"):
     get_images(registry = "docker.io", images = ["jweissig/app:0.0.1"])
 
@@ -185,3 +186,9 @@ if demo_settings.get("deploy_demo_polaris"):
     get_images(registry = "quay.io", images = ["fairwinds/polaris:0.6"])
 
   include("polaris/Tiltfile")
+
+if demo_settings.get("deploy_demo_traefik"):
+  if settings.get("preload_images_for_kind"):
+    get_images(registry = "quay.io", images = ["fairwinds/polaris:0.6"])
+
+  include("traefik/Tiltfile")
