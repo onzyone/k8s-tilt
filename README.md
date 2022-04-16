@@ -15,7 +15,7 @@ The goal for this is to setup a local env with a few tools like an ingress contr
   * [Table of contents](#Table-of-Contents)
   * [Usage](#Usage)
     * [Start](#Start)
-    * [Stop](#Stop)  
+    * [Stop](#Stop)
   * [Demos](#Demos)
   * [Troubleshooting](#Troubleshooting)
   * [Reference Documentation](#Reference-Documentation)
@@ -42,8 +42,8 @@ The goal for this is to setup a local env with a few tools like an ingress contr
 1. if running ambassador edge stack `https://SERVICE_IP/edge_stack_admin/#dashboard`
 ## Ambassador (Quote App)
 1. get ingess ip `INGRESS_IP=$(kubectl get svc --namespace ambassador ambassador -o jsonpath='{.status.loadBalancer.ingress[0].ip}')`
-1. check the quote :)  
-    ```bash 
+1. check the quote :)
+    ```bash
     curl -k https://${INGRESS_IP}/quote/
     {
         "server": "cavernous-grapefruit-wqjnlbct",
@@ -55,8 +55,8 @@ The goal for this is to setup a local env with a few tools like an ingress contr
 1. This demo builds the code located in the `basic-ingress/src` folder with the Dockerfile located in `basic-ingress/`
 1. Once the docker build is completed, Tilt will push the image into KIND, and deploy to k8s based on the files located in `basic-ingress/k8s`
 1. get ingess ip `INGRESS_IP=$(kubectl get svc --namespace ambassador ambassador -o jsonpath='{.status.loadBalancer.ingress[0].ip}')`
-1. check the basicingress :)  
-    ```bash 
+1. check the basicingress :)
+    ```bash
     curl -k https://${INGRESS_IP}/basicingress/
     <!DOCTYPE html>
     <html>
@@ -70,14 +70,14 @@ The goal for this is to setup a local env with a few tools like an ingress contr
     </body>
     ```
 
-# Troubleshooting 
+# Troubleshooting
 
 1. If you are having issues with local ingress on Mac OS, please look at this: [k8s-kind Troubleshooting](https://github.com/onzyone/k8s-kind#Troubleshooting)
 1. If local docker builds are working, but tilt builds are failing. Try to build the image with the following:
   ```bash
    $ tilt docker build .
    Running Docker command as:
-   DOCKER_BUILDKIT=1 docker build . 
+   DOCKER_BUILDKIT=1 docker build .
    ---
    ...
    ```

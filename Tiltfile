@@ -2,23 +2,24 @@
 
 # TODO move these to config files
 settings = {
-  "start_kind": True,
-  "preload_images_for_kind": True,
-  "deploy_metallb": True,
   "deploy_ambassador_api": False,
   "deploy_ambassador_edge_gateway": False,
-  "deploy_vault": False,
   "deploy_consul": False,
+  "deploy_metallb": False,
+  "deploy_vault": False,
+  "preload_images_for_kind": False,
+  "start_kind": False,
 }
 
 demo_settings = {
   "deploy_demo_ambassador_quote": False,
   "deploy_demo_argo": False,
   "deploy_demo_basic_ingress": False,
-  "deploy_demo_consul_demo": False,
-  "deploy_demo_oneup": False,
-  "deploy_demo_vault_demo": False,
-  "deploy_demo_polaris": True,
+  "deploy_demo_consul": False,
+  "deploy_demo_oneup": True,
+  "deploy_demo_polaris": False,
+  "deploy_demo_vault": False, # BROKEN
+  "deploy_demo_traefik": True,
 }
 
 # this assumes that you are running a local registry and your images are been pulled from "localhost:5000"
@@ -32,7 +33,7 @@ def deploy_metallb():
   # TODO only install metallb only if running in a local env like kind (metallb is used for a local LB)
   if settings.get("preload_images_for_kind"):
     get_images(registry = "docker.io", images = ["metallb/controller:v0.9.3", "metallb/speaker:v0.9.3"])
-  
+
   include("metallb/Tiltfile")
 
 def deploy_ambassador_api():
@@ -69,7 +70,7 @@ def deploy_ambassador_edge_gateway():
   local("kubectl create ns ambassador")
   #k8s_yaml("./helm-values/ambassador-chart/namespace.yaml")
   local("helm install ambassador --namespace ambassador datawire/ambassador --set image.repository=localhost:5000/datawire/aes --set image.tag=1.4.2")
-  
+
 def deploy_vault():
   print('Installing vault')
   if settings.get("preload_images_for_kind"):
@@ -97,7 +98,7 @@ def deploy_consul():
   print('Installing consul')
   if settings.get("preload_images_for_kind"):
     get_images(registry = "docker.io", images = ["hashicorp/consul-k8s:0.10.1", "consul:1.6.2"])
-    
+
   k8s_yaml('helm-values/consul-helm/namespace.yaml')
   yaml_consul = helm(
     'charts/stable/consul-helm',
@@ -116,9 +117,10 @@ def deploy_consul():
 
 def get_images(registry, images):
   for image in images:
-    local_resource("docker pull {} from internet".format(image), cmd='docker pull {}/{}'.format(registry, image))
-    local_resource("docker tag {}".format(image), cmd='docker tag {}/{} {}/{}'.format(registry, image, app_settings.get("local_registry"), image))
-    local_resource("docker push {} to local registry".format(image), cmd='docker push {}/{}'.format(app_settings.get("local_registry"), image))
+    local_resource('echo {}'.format(registry), cmd='echo %s, %s' % (registry, image))
+    local_resource('docker pull {} from internet'.format(image.replace('/','_')), cmd='docker pull {}/{}'.format(registry, image))
+    local_resource('docker tag {}'.format(image.replace('/','_')), cmd='docker tag {}/{} {}/{}'.format(registry, image, app_settings.get("local_registry"), image))
+    local_resource('docker push {} to local registry'.format(image.replace('/','_')), cmd='docker push {}/{}'.format(app_settings.get("local_registry"), image))
 
 #    local_resource("kind load docker-image {}/{}".format(registry, image))
 
@@ -143,7 +145,7 @@ if settings.get("deploy_ambassador_edge_gateway"):
 
 if settings.get("deploy_vault"):
   deploy_vault()
-  
+
 if settings.get("deploy_consul"):
   deploy_consul()
 
@@ -163,7 +165,7 @@ if demo_settings.get("deploy_demo_argo"):
 if demo_settings.get("deploy_demo_basic_ingress"):
   include("basic-ingress/Tiltfile")
 
-if demo_settings.get("deploy_demo_consul_demo"):
+if demo_settings.get("deploy_demo_consul"):
   if settings.get("preload_images_for_kind"):
     get_images(registry = "docker.io", images = ["hashicorp/counting-service:0.0.2", "hashicorp/dashboard-service:0.0.4"])
 
@@ -173,7 +175,7 @@ if demo_settings.get("deploy_demo_consul_demo"):
 if demo_settings.get("deploy_demo_oneup"):
   include("oneup/Tiltfile")
 
-if demo_settings.get("deploy_demo_vault_demo"):
+if demo_settings.get("deploy_demo_vault"):
   if settings.get("preload_images_for_kind"):
     get_images(registry = "docker.io", images = ["jweissig/app:0.0.1"])
 
@@ -184,3 +186,9 @@ if demo_settings.get("deploy_demo_polaris"):
     get_images(registry = "quay.io", images = ["fairwinds/polaris:0.6"])
 
   include("polaris/Tiltfile")
+
+if demo_settings.get("deploy_demo_traefik"):
+  if settings.get("preload_images_for_kind"):
+    get_images(registry = "quay.io", images = ["fairwinds/polaris:0.6"])
+
+  include("traefik/Tiltfile")
